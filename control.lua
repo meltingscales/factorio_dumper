@@ -45,6 +45,93 @@ function printi(thing, debug)
   end
 end
 
+---
+-- A GUI element to be used with the "export data" hotkey.
+--
+export_menu_gui =
+{
+  type="frame",
+  name="export_menu_gui",
+  caption="Export data!"
+}
+
+
+---
+-- These are properties that will be read into the spreadsheet.
+--
+--
+desired_properties =
+{
+  "name",
+  "type",
+  "localised_name",
+  "localised_description",
+  "stackable",
+  "stack_size",
+  "fuel_category",
+  "fuel_value",
+  "fuel_acceleration_multiplier",
+  "fuel_top_speed_multiplier"
+}
+
+---
+-- This is a list of properties that, when zero or nil, will
+-- remove all child properties.
+--
+-- For example, if something's fuel_category is nil, it shouldn't have
+-- a fuel_category, fuel_value, fuel_acceleration_multiplier, etc.
+-- Just makes stuff nicer-looking.
+--
+property_dependants =
+{
+  fuel_category = --i.e. if this in nil, remove the below things.
+  {
+    "fuel_category",
+    "fuel_value",
+    "fuel_acceleration_multiplier",
+    "fuel_top_speed_multiplier"
+  },
+
+  stackable =
+  {
+    "stackable",
+    "stack_size"
+  }
+}
+
+
+
+---
+-- @return A list of all items.
+--
+function getItems()
+  -- print("game.item_prototypes is "..table.tostring(game.item_prototypes)) --way too large...
+  ret = {} --return array
+
+  for name, prototype in pairs(game.item_prototypes) do
+    ret[name] = {} --empty dict
+
+    for _, property in pairs(desired_properties) do --get all properties. underscore is because we have no key.
+      ret[name][property] = (prototype[property] or "nil") --if nil, mark it so we can remove later
+    end
+
+    for _, property in pairs(property_dependants) do --remove properties that we don't want
+      print("checking dependants on property \'".._.."\' for item \'"..ret[name].name.."\'")
+    end
+
+    -- print(string.format("game.item_prototypes[    %s    ] =\n %s",name,table.tostring(prototype)))
+    print(string.format("ret[   %s   ] = \n%s\n",name,table.tostring(ret[name])))
+  end
+  --done going through game.item_prototypes
+
+  for key, val in pairs(ret) do
+    -- print(table.tostring(val))
+  end
+
+  return ret
+end
+
+
 print('The control.lua start')
 a=1
 print("The global a is",a)
