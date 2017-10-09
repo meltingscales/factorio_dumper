@@ -99,6 +99,14 @@ property_dependants =
 }
 
 
+function itemprototypetostring(itemPrototype)
+
+end
+
+---
+-- @return A list of properties given an item prototype.
+function getItemPrototypeInfo(itemPrototype)
+end
 
 ---
 -- @return A list of all items.
@@ -131,26 +139,53 @@ function getItems()
 end
 
 
+--this output you will always see in stdout
 print('The control.lua start')
 a=1
 print("The global a is",a)
 print("The global b is",b)
 print("The <code>global</code> c is",global.c) --global is always empty at this point
 
+function dump_items(path)
 
-function create_gui(player)
-  game.player.gui.left.add
-  {
-    type = "sprite-button",
-    name = "My_mod_button",
-    sprite = "item/my-mod-item",
-    style = "My-mod-button-style"
-  }
+  print("lol. hi. dumping. hi. jk, not implemented.")
+
+end
+
+---
+-- @param player A player from game.players
+-- @param position A string representing a position, i.e. "top" or "middle"
+-- @param elementName A string representing the name of the element
+-- @param elementData A dictionary.
+function toggle_gui_elt(player, position, elementName, elementData, debug)
+  -- if loadstring(player..".gui."..position.."."..elementName.."") == nil then
+  if (player.gui[position][elementName]) == nil then
+    player.gui[position].add(elementData)
+  else
+    player.gui[position][elementName].destroy()
+  end
+end
+
+
+function toggle_gui(player)
+
+  if(player.gui.top.dumper_greeting) == nil then --if not exist, make da GUI
+    player.gui.top.add{type="label", name="dumper_greeting", caption="Hi"}
+  else
+    player.gui.top.dumper_greeting.destroy() --remove because toggling.
+  end
+
 end
 
 function open_export_menu(player)
-  game.player.gui.top.greetin g.name == "U WANT EXPORT MENU???"
-end 
+  print("toggling export menu...")
+  toggle_gui_elt(player, "top", "export_menu_gui", export_menu_gui)
+
+  if (player.gui.top.export_menu_gui ~= nil) then --if gui exists
+    print("getting items...")
+    getItems()
+  end
+end
 
 
 local initialization = function() --define handler
