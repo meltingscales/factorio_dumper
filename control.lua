@@ -1,6 +1,5 @@
 --control.lua
 
---this output you will always see in stdout
 
 function table.val_to_str ( v )
   if "string" == type( v ) then
@@ -156,7 +155,7 @@ end
 
 local initialization = function() --define handler
     --this output will happen when your mod is loaded to the current game for the first time (even if the game itself is not new)
-   print"On init is running"
+   print("On init is running")
    print("The global a is",a)
    b=2
    print("The global b is",b)
@@ -177,10 +176,23 @@ end)
 
 --use our registered keybind
 script.on_event("export_data_button", function(event)
-    print("someone did ctrl-shift-e! hi1!!!")
+    print("someone did ctrl-shift-e! hi!!!")
     local player = game.players[event.player_index]
-    create_gui(player)
+    print("player '" .. player.name .. "' did it!")
+    open_export_menu(player)
 end)
+
+script.on_event("export_data_button_2", function(event)
+    local player = game.players[event.player_index]
+    toggle_gui(player)
+end)
+
+script.on_event("export_data_button_3", function(event)
+    local player = game.players[event.player_index]
+    toggle_gui_elt(player, "top", "testElt", {type="label", name="testElt", caption="ooh, functions"})
+end)
+
+
 
 
 
