@@ -59,12 +59,7 @@ export_menu_gui_root =
 {
   type = "frame",
   name = "export_menu_gui_root",
-  caption = "Export data!",
-    style = {
-      minimal_width = 600,
-      minimal_height = 600
-    }
-
+  caption = "Export data!"
 }
 
 
@@ -119,7 +114,7 @@ end
 ---
 -- @return A list of properties given an item prototype.
 function getItemPrototypeInfo(itemPrototype)
-
+  
 end
 
 ---
