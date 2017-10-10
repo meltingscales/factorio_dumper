@@ -38,20 +38,33 @@ function table.tostring( tbl )
 end
 
 
-function printi(thing, debug)
+function printif(thing, debug)
   if (debug) then --if debug not nil
     print(thing)
   end
 end
 
+
+test_child_elt =
+{
+  type="frame",
+  name="export_menu_option_button",
+  caption="test"
+}
+
 ---
 -- A GUI element to be used with the "export data" hotkey.
 --
-export_menu_gui =
+export_menu_gui_root =
 {
-  type="frame",
-  name="export_menu_gui",
-  caption="Export data!"
+  type = "frame",
+  name = "export_menu_gui_root",
+  caption = "Export data!",
+    style = {
+      minimal_width = 600,
+      minimal_height = 600
+    }
+
 }
 
 
@@ -106,12 +119,14 @@ end
 ---
 -- @return A list of properties given an item prototype.
 function getItemPrototypeInfo(itemPrototype)
+
 end
 
 ---
 -- @return A list of all items.
 --
 function getItems()
+  debug = false
   -- print("game.item_prototypes is "..table.tostring(game.item_prototypes)) --way too large...
   ret = {} --return array
 
@@ -123,11 +138,17 @@ function getItems()
     end
 
     for _, property in pairs(property_dependants) do --remove properties that we don't want
-      print("checking dependants on property \'".._.."\' for item \'"..ret[name].name.."\'")
+      printif("checking dependants on property \'".._.."\' for item \'"..ret[name].name.."\'",debug)
+
+      if(ret[property] == "nil") then
+        printif(string.format("we should remove ret[%s] = %s and all its related properties, \n%s"),debug)
+      end
+
+      --TODO actually remove them
     end
 
     -- print(string.format("game.item_prototypes[    %s    ] =\n %s",name,table.tostring(prototype)))
-    print(string.format("ret[   %s   ] = \n%s\n",name,table.tostring(ret[name])))
+    printif(string.format("ret[   %s   ] = \n%s\n",name,table.tostring(ret[name])),debug)
   end
   --done going through game.item_prototypes
 
@@ -139,12 +160,7 @@ function getItems()
 end
 
 
---this output you will always see in stdout
-print('The control.lua start')
-a=1
-print("The global a is",a)
-print("The global b is",b)
-print("The <code>global</code> c is",global.c) --global is always empty at this point
+
 
 function dump_items(path)
 
@@ -170,7 +186,7 @@ end
 function toggle_gui(player)
 
   if(player.gui.top.dumper_greeting) == nil then --if not exist, make da GUI
-    player.gui.top.add{type="label", name="dumper_greeting", caption="Hi"}
+    player.gui.top.add{type="label", name="dumper_greeting", caption="ctrl-shift-s hello"}
   else
     player.gui.top.dumper_greeting.destroy() --remove because toggling.
   end
@@ -179,14 +195,20 @@ end
 
 function open_export_menu(player)
   print("toggling export menu...")
-  toggle_gui_elt(player, "top", "export_menu_gui", export_menu_gui)
+  toggle_gui_elt(player, "top", export_menu_gui_root.name, export_menu_gui_root)
 
-  if (player.gui.top.export_menu_gui ~= nil) then --if gui exists
+  if (player.gui.top.export_menu_gui_root ~= nil) then --if gui exists
     print("getting items...")
     getItems()
   end
 end
 
+--this output you will always see in stdout
+print('The control.lua start')
+a=1
+print("The global a is",a)
+print("The global b is",b)
+print("The <code>global</code> c is",global.c) --global is always empty at this point
 
 local initialization = function() --define handler
     --this output will happen when your mod is loaded to the current game for the first time (even if the game itself is not new)
