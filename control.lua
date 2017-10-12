@@ -235,14 +235,47 @@ function open_export_menu(player, debug)
   end
 end
 
-function open_export_menu(player)
-  print("toggling export menu...")
-  toggle_gui_elt(player, "top", export_menu_gui_root.name, export_menu_gui_root)
+function export_items(player, path, data, debug)
+  local debug = true
+  pr("exporting bruh.",debug)
 
-  if (player.gui.top.export_menu_gui_root ~= nil) then --if gui exists
-    print("getting items...")
-    getItems()
+  itemsData = getItems()
+
+
+  out = "hello\ni am a test file\nbye!"
+  out = ""
+
+  for _, property in pairs(desired_properties) do
+    out = out .. property .. "," --append header column
   end
+
+  out = out .. "\n"
+
+  for itemname, itemproperties in pairs(itemsData) do
+    pr(string.format("itemsData[%s]:",itemname),debug)
+
+    for _, property in pairs(desired_properties) do
+      if(itemsData[itemname][property] ~= nil) then
+        pr(string.format("itemsData[%s][%s] = %s",itemname,property,itemsData[itemname][property]),debug)
+        out = out .. itemsData[itemname][property] .. ","
+      else
+        out = out .. " ,"
+      end
+    end
+
+    out = out .. "\n"
+
+    pr("\n",debug)
+
+
+
+
+  end
+
+  pr(string.format("out is: \'\'\'%s\'\'\'",out),debug)
+
+  game.write_file(path, out)
+
 end
 
 --this output you will always see in stdout
