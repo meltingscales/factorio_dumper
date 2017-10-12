@@ -1,4 +1,5 @@
 --control.lua
+require "util"
 
 
 function table.val_to_str ( v )
@@ -140,7 +141,11 @@ property_dependants =
 }
 
 
-function itemprototypetostring(itemPrototype)
+
+function init()
+
+  global.debug = settings.global['debug-messages'].value
+
 
 end
 
@@ -203,9 +208,11 @@ end
 function toggle_gui_elt(player, position, elementName, elementData, debug)
   -- if loadstring(player..".gui."..position.."."..elementName.."") == nil then
   if (player.gui[position][elementName]) == nil then
-    player.gui[position].add(elementData)
+    player.gui[position].add(elementData) --add all layout stuff
   else
-    player.gui[position][elementName].destroy()
+    while(player.gui[position][elementName] ~= nil) do
+      player.gui[position][elementName].destroy()
+    end
   end
 end
 
@@ -270,32 +277,41 @@ function export_items(player, path, data, debug)
 
 end
 
---this output you will always see in stdout
-print('The control.lua start')
-a=1
-print("The global a is",a)
-print("The global b is",b)
-print("The <code>global</code> c is",global.c) --global is always empty at this point
 
-local initialization = function() --define handler
-    --this output will happen when your mod is loaded to the current game for the first time (even if the game itself is not new)
-   print("On init is running")
-   print("The global a is",a)
-   b=2
-   print("The global b is",b)
-   global.c=3
-   print("The <code>global</code> c is",global.c)
-   print"On init is done"
+
+script.on_configuration_changed(
+  function()
+
+    pr("config updated!",true)
+
+  end
+)
+
+
+script.on_event(defines.events.on_player_created,
+function(event)
+  for i, player in pairs(game.players) do
+    --  player.gui.top.gui_root.destroy()
+    --  pr("destroying gui bruh")
+  end
 end
-script.on_init(initialization) --register handler
+)
+
+-- script.on_init(initialization) --register handler
 --you can also define handler during the registration itself:
-script.on_load(function()
+script.on_init(function()
     --this output will happen when the savegame is loaded and the mod was present during the save process
-   print("On load is running")
-   print("The global a is",a)
-   print("The global b is",b)
-   print("The <code>global</code> c is",global.c)
-   print("On load is done")
+    pr("FIRST TIME LOAD!!!")
+
+    debug = settings.global['debug-messages'].value
+    if(debug) then
+      pr("Debug for factoriodumper enabled!")
+    else
+      pr("Debug for factoriodumper disabled!")
+    end
+
+
+end)
 
 --event handler for clicking on a GUI
 script.on_event(defines.events.on_gui_click, function(event)
@@ -312,14 +328,21 @@ script.on_event(defines.events.on_gui_click, function(event)
       export_items(player, event.element.parent.path_frame.path_textbox.text,data)
     end
 end)
+
+script.on_event(defines.events.on_player_joined_game, function(event)
+  local player = game.players[event.player_index]
+
+  pr("someone joined the game!!!\n\n\n",debug)
+
 end)
 
 --use our registered keybind
 script.on_event("export_data_button", function(event)
-    print("someone did ctrl-shift-e! hi!!!")
+    pr("someone did ctrl-shift-e! hi!!!")
     local player = game.players[event.player_index]
-    print("player '" .. player.name .. "' did it!")
+    pr("player '" .. player.name .. "' did it!")
     open_export_menu(player)
+    pr("")
 end)
 
 script.on_event("export_data_button_2", function(event)
@@ -334,9 +357,4 @@ end)
 
 
 
-
-
-
-
-
-print('The control.lua end') --guess when this output will take place
+pr('The control.lua end') --guess when this output will take place
