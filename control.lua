@@ -38,11 +38,19 @@ function table.tostring( tbl )
 end
 
 
-function printif(thing, debug)
-  if (debug) then --if debug not nil
+function printif(thing, boolean)
+  if (boolean == true) then --if boolean not nil
     print(thing)
   end
 end
+
+function pr(thing, boolean)
+  if(boolean == nil) then
+    boolean = global.debug
+  end
+  printif("[facDump]  " .. tostring(thing),debug)
+end
+
 
 
 test_child_elt =
