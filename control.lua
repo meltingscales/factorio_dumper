@@ -161,8 +161,7 @@ end
 -- @return A list of all items.
 --
 function getItems()
-  debug = false
-  -- print("game.item_prototypes is "..table.tostring(game.item_prototypes)) --way too large...
+  -- pr("game.item_prototypes is "..table.tostring(game.item_prototypes)) --way too large...
   ret = {} --return array
 
   for name, prototype in pairs(game.item_prototypes) do
@@ -172,35 +171,28 @@ function getItems()
       ret[name][property] = (prototype[property] or "nil") --if nil, mark it so we can remove later
     end
 
-    for _, property in pairs(property_dependants) do --remove properties that we don't want
-      printif("checking dependants on property \'".._.."\' for item \'"..ret[name].name.."\'",debug)
+    for parent, child in pairs(property_dependants) do --check if any parents don't exist
+      pr("checking dependants on property \'"..parent.."\' for item \'"..ret[name].name.."\'",debug)
 
-      if(ret[property] == "nil") then
-        printif(string.format("we should remove ret[%s] = %s and all its related properties, \n%s"),debug)
+      if(ret[name][parent] == "nil") then
+        pr(string.format("\n   !!!we should remove ret[%s][%s] = %s and all its related properties, %s",name,parent,ret[parent],table.tostring(property_dependants[parent])),debug)
+
+        for _, dependant in pairs(property_dependants[parent]) do --actually remove the children
+          pr(string.format("deleting ret[%s][%s]",name,dependant),debug)
+          ret[name][dependant] = nil
+        end
+
+        pr("\n\n",debug)
       end
 
-      --TODO actually remove them
     end
 
-    -- print(string.format("game.item_prototypes[    %s    ] =\n %s",name,table.tostring(prototype)))
-    printif(string.format("ret[   %s   ] = \n%s\n",name,table.tostring(ret[name])),debug)
+    -- pr(string.format("game.item_prototypes[    %s    ] =\n %s",name,table.tostring(prototype)))
+    pr(string.format("ret[   %s   ] = \n%s\n",name,table.tostring(ret[name])),debug)
   end
   --done going through game.item_prototypes
 
-  for key, val in pairs(ret) do
-    -- print(table.tostring(val))
-  end
-
   return ret
-end
-
-
-
-
-function dump_items(path)
-
-  print("lol. hi. dumping. hi. jk, not implemented.")
-
 end
 
 ---
