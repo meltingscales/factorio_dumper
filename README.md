@@ -7,3 +7,4 @@ It will eventually have some handy recipe requirement calculators (How much copp
 as well as an items-per-second belt calculator (how many belts of copper and iron for 1 fast belt of green circuits?)
 and maybe even a train speed calculator!
 
+To install, put the .zip file from the <a href="https://github.com/HenryFBP/factorio_dumper/releases/">releases</a> into <code>C:\Users\USERNAME\AppData\Roaming\Factorio\mods</code> as you would any other mod.
