@@ -52,36 +52,67 @@ function pr(thing, boolean)
 end
 
 
+local color_a =
+{
+  r=0.8,
+  g=0,
+  b=0.8,
+  a=1
+}
 
-test_child_elt =
+local color_b =
+{
+  r=0.5,
+  g=0.5,
+  b=0,
+  a=0
+}
+
+color_c =
+{
+  r=0,
+  g=1,
+  b=1,
+  a=0.2
+}
+
+local test_child_elt =
 {
   type="frame",
   name="export_menu_option_button",
   caption="test"
 }
 
+local test_style =
+{
+  minimal_width = 500,
+  minimal_height = 500,
+  maximal_width = 600,
+  maximal_height = 900,
+  font_color = color_a
+}
+
 ---
 -- A GUI element to be used with the "export data" hotkey.
 --
-export_menu_gui_root =
+local gui_root =
 {
   type = "frame",
-  name = "export_menu_gui_root",
+  name = "gui_root",
   caption = "Export data!"
 }
 
 
+
+
 ---
 -- These are properties that will be read into the spreadsheet.
---
+-- They will also be put into the spreadsheet's headers.
 --
 desired_properties =
 {
   "name",
   "type",
-  "localised_name",
-  "localised_description",
-  "stackable",
   "stack_size",
   "fuel_category",
   "fuel_value",
@@ -95,7 +126,7 @@ desired_properties =
 --
 -- For example, if something's fuel_category is nil, it shouldn't have
 -- a fuel_category, fuel_value, fuel_acceleration_multiplier, etc.
--- Just makes stuff nicer-looking.
+-- Just makes stuff nicer-looking when printing it.
 --
 property_dependants =
 {
@@ -105,12 +136,6 @@ property_dependants =
     "fuel_value",
     "fuel_acceleration_multiplier",
     "fuel_top_speed_multiplier"
-  },
-
-  stackable =
-  {
-    "stackable",
-    "stack_size"
   }
 }
 
@@ -119,11 +144,18 @@ function itemprototypetostring(itemPrototype)
 
 end
 
+
 ---
--- @return A list of properties given an item prototype.
-function getItemPrototypeInfo(itemPrototype)
-  
+--
+--
+--
+function apply_style(LuaGui, LuaStyle, debug)
+  for key, value in pairs(LuaStyle) do
+    pr(string.format("doing LuaGui.style.%s = %s",key,value),debug)
+    LuaGui.style[key] = value
+  end
 end
+
 
 ---
 -- @return A list of all items.
@@ -186,14 +218,21 @@ function toggle_gui_elt(player, position, elementName, elementData, debug)
 end
 
 
-function toggle_gui(player)
+function open_export_menu(player, debug)
+  pr("toggling export menu...",debug)
 
-  if(player.gui.top.dumper_greeting) == nil then --if not exist, make da GUI
-    player.gui.top.add{type="label", name="dumper_greeting", caption="ctrl-shift-s hello"}
-  else
-    player.gui.top.dumper_greeting.destroy() --remove because toggling.
+  toggle_gui_elt(player, "top", gui_root.name, gui_root)
+
+  if (player.gui.top.gui_root ~= nil) then --if gui exists
+
+    apply_style(player.gui.top.gui_root, test_style)
+
+    player.gui.top.gui_root.add({type="frame", name="path_frame"})
+
+    player.gui.top.gui_root.path_frame.add({type="label", name="", caption="Name"})
+    player.gui.top.gui_root.path_frame.add({type="textfield", name="path_textbox", text="factorio-items.csv", tooltip="Name to export a .csv file to.\nWill be found inside of:\nC:\\Users\\USERNAME\\AppData\\Roaming\\Factorio\\script-output"})
+    player.gui.top.gui_root.add({type="button", name="exportButton", caption="Export!", })
   end
-
 end
 
 function open_export_menu(player)
@@ -232,6 +271,22 @@ script.on_load(function()
    print("The global b is",b)
    print("The <code>global</code> c is",global.c)
    print("On load is done")
+
+--event handler for clicking on a GUI
+script.on_event(defines.events.on_gui_click, function(event)
+    local player = game.players[event.player_index]
+
+    pr(string.format("clicked element named '%s'",event.element.name),debug)
+
+    if (event.element.name == "exportButton") then
+      local textbox =
+
+      pr(string.format("Exporting data to %s",event.element.parent.path_frame.path_textbox.text),debug)
+
+
+      export_items(player, event.element.parent.path_frame.path_textbox.text,data)
+    end
+end)
 end)
 
 --use our registered keybind
@@ -244,7 +299,7 @@ end)
 
 script.on_event("export_data_button_2", function(event)
     local player = game.players[event.player_index]
-    toggle_gui(player)
+    toggle_gui_elt(player, "top", "dumper_greeting", {type="label", name="dumper_greeting", caption="ctrl-shift-s hello"})
 end)
 
 script.on_event("export_data_button_3", function(event)
