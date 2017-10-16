@@ -266,7 +266,7 @@ function export_items(player, path, data, debug)
 
     pr("\n",debug)
 
-
+    player.print("Successfully exported data to \'factorio\\script-output\\"..path.."\'!")
 
 
   end
