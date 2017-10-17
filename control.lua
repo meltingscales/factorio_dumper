@@ -49,7 +49,7 @@ function pr(thing, boolean)
   if(boolean == nil) then
     boolean = global.debug
   end
-  printif("[facDump]  " .. tostring(thing),debug)
+  printif(brand.."  "..tostring(thing),debug)
 end
 
 
@@ -69,7 +69,7 @@ local color_b =
   a=0
 }
 
-color_c =
+local color_c =
 {
   r=0,
   g=1,
@@ -92,6 +92,12 @@ local test_style =
   maximal_height = 900,
   font_color = color_a
 }
+
+brand = "[facDump]"
+where_path = "Name to export a .csv file to.\nWill be found inside of:\nC:\\Users\\USERNAME\\AppData\\Roaming\\Factorio\\script-output"
+BLANK_ITEM = " "
+DELIMITER = ","
+
 
 ---
 -- A GUI element to be used with the "export data" hotkey.
@@ -221,7 +227,9 @@ function open_export_menu(player, debug)
   pr("toggling export menu...",debug)
 
   toggle_gui_elt(player, "top", gui_root.name, gui_root)
-
+  
+  local p = player
+  
   if (player.gui.top.gui_root ~= nil) then --if gui exists
 
     apply_style(player.gui.top.gui_root, test_style)
@@ -229,23 +237,41 @@ function open_export_menu(player, debug)
     player.gui.top.gui_root.add({type="frame", name="path_frame"})
 
     player.gui.top.gui_root.path_frame.add({type="label", name="", caption="Name"})
-    player.gui.top.gui_root.path_frame.add({type="textfield", name="path_textbox", text="factorio-items.csv", tooltip="Name to export a .csv file to.\nWill be found inside of:\nC:\\Users\\USERNAME\\AppData\\Roaming\\Factorio\\script-output"})
-    player.gui.top.gui_root.add({type="button", name="exportButton", caption="Export!", })
+    player.gui.top.gui_root.path_frame.add({type="textfield", name="path_textbox", text="factorio-items.csv", tooltip=where_path})
+
+    --table to toggle columns! turning desired_properties items on or off
+    player.gui.top.gui_root.add({type="frame", name="fields_frame", tooltip="i like looah"})
+    player.gui.top.gui_root.fields_frame.add({name="fields_table",type="table",colspan=2})
+    
+    local prepend = "fields_"
+    
+
+    --add all properties to allow player to select from them.
+    for i = 1, #desired_properties do
+      player.gui.top.gui_root.fields_frame.fields_table.add(
+        {type="label",name=prepend..desired_properties[i],caption=desired_properties[i]}
+      )
+    end
+
+
+    
+    --button to export stuff.
+    --event listener is created elsewhere that calls export_items.
+    player.gui.top.gui_root.add({type="button", name="exportButton", caption="Export!" })
+
   end
 end
 
 function export_items(player, path, data, debug)
-  local debug = true
   pr("exporting bruh.",debug)
 
   itemsData = getItems()
 
 
-  out = "hello\ni am a test file\nbye!"
   out = ""
 
   for _, property in pairs(desired_properties) do
-    out = out .. property .. "," --append header column
+    out = out .. property .. DELIMITER --append header column
   end
 
   out = out .. "\n"
@@ -256,20 +282,24 @@ function export_items(player, path, data, debug)
     for _, property in pairs(desired_properties) do
       if(itemsData[itemname][property] ~= nil) then
         pr(string.format("itemsData[%s][%s] = %s",itemname,property,itemsData[itemname][property]),debug)
-        out = out .. itemsData[itemname][property] .. ","
+        out = out .. itemsData[itemname][property] --append 20 or "iron_plate"
       else
-        out = out .. " ,"
+        out = out .. BLANK_ITEM --add 0 or NULL or something else 
       end
+      
+      out = out .. DELIMITER --unconditionally add delimiter
+      
     end
 
     out = out .. "\n"
 
     pr("\n",debug)
 
-    player.print("Successfully exported data to \'factorio\\script-output\\"..path.."\'!")
 
 
   end
+
+  player.print("Successfully exported data to \'factorio\\script-output\\"..path.."\'!")
 
   pr(string.format("out is: \'\'\'%s\'\'\'",out),debug)
 
@@ -282,7 +312,9 @@ end
 script.on_configuration_changed(
   function()
 
+    debug = settings.global['debug-messages'].value
     pr("config updated!",true)
+    
 
   end
 )
@@ -304,6 +336,9 @@ script.on_init(function()
     pr("FIRST TIME LOAD!!!")
 
     debug = settings.global['debug-messages'].value
+    
+    print("debug was set to "..debug)
+    
     if(debug) then
       pr("Debug for factoriodumper enabled!")
     else
@@ -320,7 +355,6 @@ script.on_event(defines.events.on_gui_click, function(event)
     pr(string.format("clicked element named '%s'",event.element.name),debug)
 
     if (event.element.name == "exportButton") then
-      local textbox =
 
       pr(string.format("Exporting data to %s",event.element.parent.path_frame.path_textbox.text),debug)
 
@@ -332,7 +366,7 @@ end)
 script.on_event(defines.events.on_player_joined_game, function(event)
   local player = game.players[event.player_index]
 
-  pr("someone joined the game!!!\n\n\n",debug)
+  pr("someone joined the game!!!\n\n\n")
 
 end)
 
