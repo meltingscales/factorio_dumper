@@ -86,9 +86,9 @@ local test_child_elt =
 
 local test_style =
 {
-  minimal_width = 500,
+  minimal_width = 700,
   minimal_height = 500,
-  maximal_width = 600,
+  maximal_width = 900,
   maximal_height = 900,
   font_color = color_a
 }
@@ -240,17 +240,31 @@ function open_export_menu(player, debug)
     player.gui.top.gui_root.path_frame.add({type="textfield", name="path_textbox", text="factorio-items.csv", tooltip=where_path})
 
     --table to toggle columns! turning desired_properties items on or off
-    player.gui.top.gui_root.add({type="frame", name="fields_frame", tooltip="i like looah"})
-    player.gui.top.gui_root.fields_frame.add({name="fields_table",type="table",colspan=2})
+    player.gui.top.gui_root.add({type="frame", name="fields_frame", tooltip=name})
+    player.gui.top.gui_root.fields_frame.add({name="fields_table",type="table",colspan=4})
     
     local prepend = "fields_"
+    local buttonIDer = "_button"
     
 
     --add all properties to allow player to select from them.
     for i = 1, #desired_properties do
-      player.gui.top.gui_root.fields_frame.fields_table.add(
-        {type="label",name=prepend..desired_properties[i],caption=desired_properties[i]}
-      )
+      local tooltipName = "toggle \""..desired_properties[i].."\" column in output file?"
+      
+      
+      player.gui.top.gui_root.fields_frame.fields_table.add({
+        type="label",
+        tooltip = tooltipName,
+        name=prepend..desired_properties[i],
+        caption=desired_properties[i],
+      })
+      
+      player.gui.top.gui_root.fields_frame.fields_table.add({
+        type="checkbox",
+        state=true,
+        name=prepend..desired_properties[i]..buttonIDer,
+        tooltip=tooltipName
+      })
     end
 
 
@@ -277,11 +291,11 @@ function export_items(player, path, data, debug)
   out = out .. "\n"
 
   for itemname, itemproperties in pairs(itemsData) do
-    pr(string.format("itemsData[%s]:",itemname),debug)
+    pr(string.format("itemsData[%s]:",itemname))
 
     for _, property in pairs(desired_properties) do
       if(itemsData[itemname][property] ~= nil) then
-        pr(string.format("itemsData[%s][%s] = %s",itemname,property,itemsData[itemname][property]),debug)
+        pr(string.format("itemsData[%s][%s] = %s",itemname,property,itemsData[itemname][property]))
         out = out .. itemsData[itemname][property] --append 20 or "iron_plate"
       else
         out = out .. BLANK_ITEM --add 0 or NULL or something else 
@@ -337,7 +351,6 @@ script.on_init(function()
 
     debug = settings.global['debug-messages'].value
     
-    print("debug was set to "..debug)
     
     if(debug) then
       pr("Debug for factoriodumper enabled!")
@@ -352,10 +365,9 @@ end)
 script.on_event(defines.events.on_gui_click, function(event)
     local player = game.players[event.player_index]
 
-    pr(string.format("clicked element named '%s'",event.element.name),debug)
+    pr(string.format("clicked element named '%s'",event.element.name))
 
     if (event.element.name == "exportButton") then
-
       pr(string.format("Exporting data to %s",event.element.parent.path_frame.path_textbox.text),debug)
 
 
