@@ -113,9 +113,11 @@ local gui_root =
 
 
 ---
--- These are properties that will be read into the spreadsheet.
+-- These are properties that can be read into the spreadsheet.
 -- They will also be put into the spreadsheet's headers.
 --
+-- Depending on what the player chooses, some may be ignored.
+-- All are read in by default.
 desired_properties =
 {
   "name",
@@ -126,6 +128,19 @@ desired_properties =
   "fuel_acceleration_multiplier",
   "fuel_top_speed_multiplier"
 }
+
+
+---
+-- This is a table of boolean values that correspond to the desired_properties
+-- list above. They are modified when you click a checkbox to toggle a column,
+-- and are read from when export_items() is called to decide which columns to 
+-- actually print out.
+--
+desired_properties_checkbox = {}
+for i=1, #desired_properties do
+  desired_properties_checkbox[desired_properties] = true
+end
+
 
 ---
 -- This is a list of properties that, when zero or nil, will
@@ -162,7 +177,7 @@ end
 --
 function apply_style(LuaGui, LuaStyle, debug)
   for key, value in pairs(LuaStyle) do
-    pr(string.format("doing LuaGui.style.%s = %s",key,value),debug)
+    pr(string.format("doing LuaGui.style.%s = %s",key,value))
     LuaGui.style[key] = value
   end
 end
@@ -263,7 +278,9 @@ function open_export_menu(player, debug)
         type="checkbox",
         state=true,
         name=prepend..desired_properties[i]..buttonIDer,
-        tooltip=tooltipName
+        tooltip=tooltipName,
+        meta1="columnToggler",
+        meta2=desired_properties[i]
       })
     end
 
@@ -363,16 +380,26 @@ end)
 
 --event handler for clicking on a GUI
 script.on_event(defines.events.on_gui_click, function(event)
+
     local player = game.players[event.player_index]
+    local guiElt = event.element
 
     pr(string.format("clicked element named '%s'",event.element.name))
 
-    if (event.element.name == "exportButton") then
-      pr(string.format("Exporting data to %s",event.element.parent.path_frame.path_textbox.text),debug)
-
-
-      export_items(player, event.element.parent.path_frame.path_textbox.text,data)
+    --if player has clicked export button
+    if (guiElt.name == "exportButton") then
+      pr(string.format("Exporting data to %s",guiElt.parent.path_frame.path_textbox.text),debug)
+      export_items(player, guiElt.parent.path_frame.path_textbox.text,data)
     end
+
+    --if player has clicked a checkbox
+    if (guiElt.meta1 == "columnToggler") then
+      --update our boolean table so when we export_items() it uses our settings
+      desired_properties_checkbox[guiElt.meta2] = guiElt.checkbox.state
+    end
+      
+
+
 end)
 
 script.on_event(defines.events.on_player_joined_game, function(event)
