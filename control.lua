@@ -47,7 +47,7 @@ end
 
 function pr(thing, boolean)
   if(boolean == nil) then
-    boolean = global.debug
+    boolean = settings.global['debug-messages'].value
   end
   printif(brand.."  "..tostring(thing),debug)
 end
