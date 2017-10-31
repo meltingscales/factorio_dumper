@@ -97,6 +97,9 @@ brand = "[facDump]"
 where_path = "Name to export a .csv file to.\nWill be found inside of:\nC:\\Users\\USERNAME\\AppData\\Roaming\\Factorio\\script-output"
 BLANK_ITEM = " "
 DELIMITER = ","
+IDENT_COLUMN_TOGGLER = "1" --to identify checkboxes by using guiElt.name
+
+
 
 
 ---
@@ -133,7 +136,7 @@ desired_properties =
 ---
 -- This is a table of boolean values that correspond to the desired_properties
 -- list above. They are modified when you click a checkbox to toggle a column,
--- and are read from when export_items() is called to decide which columns to 
+-- and are read from when export_items() is called to decide which columns to
 -- actually print out.
 --
 desired_properties_checkbox = {}
@@ -242,9 +245,9 @@ function open_export_menu(player, debug)
   pr("toggling export menu...",debug)
 
   toggle_gui_elt(player, "top", gui_root.name, gui_root)
-  
+
   local p = player
-  
+
   if (player.gui.top.gui_root ~= nil) then --if gui exists
 
     apply_style(player.gui.top.gui_root, test_style)
@@ -257,35 +260,36 @@ function open_export_menu(player, debug)
     --table to toggle columns! turning desired_properties items on or off
     player.gui.top.gui_root.add({type="frame", name="fields_frame", tooltip=name})
     player.gui.top.gui_root.fields_frame.add({name="fields_table",type="table",colspan=4})
-    
+
     local prepend = "fields_"
     local buttonIDer = "_button"
-    
+
 
     --add all properties to allow player to select from them.
     for i = 1, #desired_properties do
       local tooltipName = "toggle \""..desired_properties[i].."\" column in output file?"
-      
-      
+
+
       player.gui.top.gui_root.fields_frame.fields_table.add({
         type="label",
         tooltip = tooltipName,
         name=prepend..desired_properties[i],
         caption=desired_properties[i],
       })
-      
+
       player.gui.top.gui_root.fields_frame.fields_table.add({
         type="checkbox",
         state=true,
-        name=prepend..desired_properties[i]..buttonIDer,
-        tooltip=tooltipName,
-        meta1="columnToggler",
-        meta2=desired_properties[i]
+        name=IDENT_COLUMN_TOGGLER .. prepend .. desired_properties[i] .. buttonIDer,
+        tooltip=tooltipName
       })
+
+      pr("end??")
+
     end
 
 
-    
+
     --button to export stuff.
     --event listener is created elsewhere that calls export_items.
     player.gui.top.gui_root.add({type="button", name="exportButton", caption="Export!" })
@@ -315,11 +319,11 @@ function export_items(player, path, data, debug)
         pr(string.format("itemsData[%s][%s] = %s",itemname,property,itemsData[itemname][property]))
         out = out .. itemsData[itemname][property] --append 20 or "iron_plate"
       else
-        out = out .. BLANK_ITEM --add 0 or NULL or something else 
+        out = out .. BLANK_ITEM --add 0 or NULL or something else
       end
-      
+
       out = out .. DELIMITER --unconditionally add delimiter
-      
+
     end
 
     out = out .. "\n"
@@ -345,7 +349,7 @@ script.on_configuration_changed(
 
     debug = settings.global['debug-messages'].value
     pr("config updated!",true)
-    
+
 
   end
 )
@@ -367,8 +371,8 @@ script.on_init(function()
     pr("FIRST TIME LOAD!!!")
 
     debug = settings.global['debug-messages'].value
-    
-    
+
+
     if(debug) then
       pr("Debug for factoriodumper enabled!")
     else
@@ -392,12 +396,16 @@ script.on_event(defines.events.on_gui_click, function(event)
       export_items(player, guiElt.parent.path_frame.path_textbox.text,data)
     end
 
+    print("hi. guielt.name[0] = "..guiElt.name:sub(0,1))
     --if player has clicked a checkbox
-    if (guiElt.meta1 == "columnToggler") then
+    if (guiElt.name:sub(0,1) == IDENT_COLUMN_TOGGLER) then --using first letter for IDing them
       --update our boolean table so when we export_items() it uses our settings
       desired_properties_checkbox[guiElt.meta2] = guiElt.checkbox.state
+
+      pr("column for \'"..guiElt.meta2.."\' changed to \'"..tostring(guiElt.checkbox.state).."\'")
+
     end
-      
+
 
 
 end)
