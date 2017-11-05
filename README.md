@@ -1,6 +1,8 @@
 # Factorio Dumper
 an item info/recipe tree dumper mod for factorio
 
+Mod page: https://mods.factorio.com/mods/HenryFBP/factorioDumper
+
 This mod is intended to assist players in dumping data such as stack size, item speed, fluid amount, belt speed, and other things to spreadsheets.
 
 It will eventually have some handy recipe requirement calculators (How much copper + iron for 300 green circuits?)
